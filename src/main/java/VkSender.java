@@ -16,12 +16,12 @@ import java.util.List;
 
 public class VkSender {
 
-    //please don't use my token for your necessaries, I am too lazy for crypt it 
-    static final String ACCESS_USER_TOKEN = "c3a3951a10766d7bf62cce39fc9d369a5368cb4c598c9b0de5a7bfb848cc7c735a26840161c7b5df2de29";
+    //please don't use my token for your necessaries, I am too lazy for crypt it
+    static final String ACCESS_USER_TOKEN = "2faadb189892eb4dec2402a33bb60d9198758d2ffbce9f9bf329aa36a05cbb204cb7279055565c2450404";
     static final String ACCESS_TOKEN = "a821762541a7e01f041f131e135547cb538dd13ebab510ed3dd0a827b9f5317f25e90f9bad9d0e47cc9c3";
     static final String GROUP_DOMAIN = "bookworld_hm";
-
-    static String OWNER_ID = "-117584600" ;
+    static final String OWNER_ID = "-117584600" ;
+    static final String USER_ID = "89548778";
 
     public static void post(String text, String photoUri ,long unixTime) throws IOException {
 
@@ -32,10 +32,11 @@ public class VkSender {
         List<BasicNameValuePair> nvps = new ArrayList<>();
         nvps.add(new BasicNameValuePair("access_token",ACCESS_USER_TOKEN));
         nvps.add(new BasicNameValuePair("owner_id",OWNER_ID));
-        nvps.add(new BasicNameValuePair("form_group","1"));
+        nvps.add(new BasicNameValuePair("from_group","1"));
         nvps.add(new BasicNameValuePair("message", text));
-        nvps.add(new BasicNameValuePair("attachments",photoUri));
+        //nvps.add(new BasicNameValuePair("attachments",""));
         //nvps.add(new BasicNameValuePair("publish_date","0")); TODO
+        nvps.add(new BasicNameValuePair("v","5.73"));
 
 
 
@@ -47,28 +48,5 @@ public class VkSender {
         System.out.println(response);
 
 
-    }
-
-    private static String loadToAlbum(File photo){
-
-        return "";
-    }
-
-    private static File saveFromBook24(URI photoUri){
-        File file = null;
-
-        return file;
-    }
-
-    public static String loadPhotoToVk(String Book24Uri){
-        URI uri = null;
-        try {
-            uri = new URI(Book24Uri);
-        } catch (URISyntaxException e) {
-            System.out.println("не удалось создать ссылку для загрузки из вк \n loadPhotoToVk error");
-            e.printStackTrace();
-        }
-        String AlbumPhotoAdress = loadToAlbum(saveFromBook24(uri));
-        return AlbumPhotoAdress;
     }
 }
