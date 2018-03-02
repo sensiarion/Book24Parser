@@ -18,8 +18,7 @@ public class VkSender {
 
     //please don't use my token for your necessaries, I am too lazy for crypt it 
     static final String ACCESS_USER_TOKEN = "c3a3951a10766d7bf62cce39fc9d369a5368cb4c598c9b0de5a7bfb848cc7c735a26840161c7b5df2de29";
-    static final String ACCESS_TOKEN = "a821762541a7e01f041f131e135547cb538dd13ebab510ed3dd0a827b9f5317f25e90f9bad9d0e47cc9c3";
-    static final String GROUP_DOMAIN = "bookworld_hm";
+
 
     static String OWNER_ID = "-117584600" ;
 
