@@ -1,15 +1,17 @@
+import org.apache.http.cookie.Cookie;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-
+import java.net.CookieStore;
 
 
 public class Book24Parser {
 
-    static String post;
+    private static String post;
 
     public static String getEntity(final String url){
 
@@ -31,8 +33,8 @@ public class Book24Parser {
 
         post =  author.text() + " - \"" +title.text()+ "\"" + "\n" + "\n" + description.text() + "\n";
 
-        String imageUri = "book24.ru"+(image.attr("src"));
-
+        String imageUri = "https://book24.ru"+(image.attr("src"));
+        System.out.println(imageUri);
 
         return post;
     }

@@ -6,11 +6,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.File;
 import java.io.IOException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,14 +35,8 @@ public class VkSender {
         //nvps.add(new BasicNameValuePair("publish_date","0")); TODO
         nvps.add(new BasicNameValuePair("v","5.73"));
 
-
-
-        HttpPost post = new HttpPost("https://api.vk.com/method/wall.post");
-
-        post.setEntity(new UrlEncodedFormEntity(nvps,"UTF-8"));
-        CloseableHttpClient client = HttpClients.createDefault();
-        CloseableHttpResponse response = client.execute(post);
-        System.out.println(response);
+        CloseableHttpResponse response = HttpApacheHandler.getResponseFromPostType("https://api.vk.com/method/wall.post",nvps);
+        System.out.println(HttpApacheHandler.getResponseEntity(response,false));
 
 
     }
