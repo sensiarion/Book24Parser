@@ -14,7 +14,6 @@ public class Book24Parser {
     private static String post;
 
     public static String getEntity(final String url){
-
         //create Json doc and copying data from url
         Document doc = null;
         try {

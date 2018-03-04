@@ -1,11 +1,16 @@
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -13,12 +18,14 @@ import java.util.List;
 
 public class VkSender {
 
-    //please don't use my token for your necessaries, I am too lazy for crypt it
-    static final String ACCESS_USER_TOKEN = "2faadb189892eb4dec2402a33bb60d9198758d2ffbce9f9bf329aa36a05cbb204cb7279055565c2450404";
+    //please don't use my token for your necessaries, I am too lazy for crypt it or hide in ENUM
+    static final String ACCESS_USER_TOKEN = "ae82396cb24f68048c5a94955006747f3ff25916e7b8e2a8074f5a687110cb2f600d5753e6efdfc761d12";
     static final String ACCESS_TOKEN = "a821762541a7e01f041f131e135547cb538dd13ebab510ed3dd0a827b9f5317f25e90f9bad9d0e47cc9c3";
     static final String GROUP_DOMAIN = "bookworld_hm";
     static final String OWNER_ID = "-117584600" ;
+    static final String GROUP_ID = "117584600";
     static final String USER_ID = "89548778";
+    static final String ALBUM_ID = "252164558";
 
     public static void post(String text, String photoUri ,long unixTime) throws IOException {
 
@@ -28,7 +35,7 @@ public class VkSender {
 
         List<BasicNameValuePair> nvps = new ArrayList<>();
         nvps.add(new BasicNameValuePair("access_token",ACCESS_USER_TOKEN));
-        nvps.add(new BasicNameValuePair("owner_id",OWNER_ID));
+        nvps.add(new BasicNameValuePair("owner_id", OWNER_ID));
         nvps.add(new BasicNameValuePair("from_group","1"));
         nvps.add(new BasicNameValuePair("message", text));
         //nvps.add(new BasicNameValuePair("attachments",""));
@@ -40,4 +47,75 @@ public class VkSender {
 
 
     }
+
+    public static String UploadPhotoToAlbum(String photoPath,String albumId,String groupId) throws IOException {
+        String respose ="";
+        JSONObject jsonPhotoInfo =  UploadToServer(getUploadServer(albumId,groupId),photoPath);
+        System.out.println(jsonPhotoInfo.get("server"));
+        System.out.println(jsonPhotoInfo.get("photos_list"));
+        System.out.println(jsonPhotoInfo.get("hash"));
+
+
+        List<BasicNameValuePair> nvps = new ArrayList<>();
+        nvps.add(new BasicNameValuePair("access_token",ACCESS_USER_TOKEN));
+        nvps.add(new BasicNameValuePair("album_id",albumId));
+        nvps.add(new BasicNameValuePair("group_id",groupId));
+        nvps.add(new BasicNameValuePair("server",jsonPhotoInfo.get("server").toString()));
+        nvps.add(new BasicNameValuePair("photos_list",jsonPhotoInfo.get("photos_list").toString()));
+        nvps.add(new BasicNameValuePair("hash",jsonPhotoInfo.get("hash").toString()));
+        nvps.add(new BasicNameValuePair("v","5.73"));
+
+        CloseableHttpResponse response = HttpApacheHandler.getResponseFromPostType("https://api.vk.com/method/photos.save",nvps);
+        System.out.println(HttpApacheHandler.getResponseEntity(response,false));
+
+        return respose;
+    }
+
+    public static String getUploadServer(String albumId,String groupId) throws IOException {
+        String upload_url;
+
+        List<BasicNameValuePair> nvps = new ArrayList<>();
+        nvps.add(new BasicNameValuePair("access_token",ACCESS_USER_TOKEN));
+        nvps.add(new BasicNameValuePair("album_id",albumId));
+        nvps.add(new BasicNameValuePair("group_id",groupId));
+        nvps.add(new BasicNameValuePair("v","5.73"));
+
+        HttpResponse response = HttpApacheHandler.getResponseFromGetType("https://api.vk.com/method/photos.getUploadServer",nvps);
+        org.json.JSONObject responseEntity = HttpApacheHandler.getResponseEntity(response);
+        upload_url = responseEntity.getJSONObject("response").getString("upload_url");
+        System.out.println(upload_url);
+
+
+        return upload_url;
+    }
+
+    public static JSONObject UploadToServer(String uploadUrl, String photoPath){
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost post = new HttpPost(uploadUrl);
+
+        //transfer photo to multipart/form-data and send it to UploadServer
+        FileBody uploadFilePart = new FileBody(new File(photoPath));
+        MultipartEntity reqEntity = new MultipartEntity();
+        reqEntity.addPart("file1",uploadFilePart);
+        post.setEntity(reqEntity);
+
+        CloseableHttpResponse response = null;
+        try {
+            response =  httpClient.execute(post);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        JSONObject responseObj = null;
+        try {
+            responseObj = HttpApacheHandler.getResponseEntity(response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return responseObj;
+
+    }
 }
+
+
