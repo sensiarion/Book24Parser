@@ -1,34 +1,31 @@
+package com;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class GUI extends JFrame {
-    private JTextField textField1;
+    private JTextField urlTextField;
     public JButton postButton;
-    private JComboBox comboBox1;
-    public JButton changeButton;
+    public JList dateList;
     private JPanel panel;
-    private JLabel label1;
+    private JLabel urlLabel;
+    public JButton dayButton;
+    private JLabel timeLabel;
+    public JTextField dateTextField;
+    public JButton dateChangeButton;
     public static volatile boolean ParseError = false;
-    public static volatile String post = "";
 
 
     GUI(){
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
-        setSize(new Dimension(600,400));
+        setSize(new Dimension(400,300));
         add(panel);
         setVisible(true);
 
 
-        changeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
 
-            }
-        });
     }
 
     private static void parseErrorHandler(){
@@ -37,7 +34,7 @@ public class GUI extends JFrame {
     }
 
     public String getUrl(){
-        String url = textField1.getText();
+        String url = urlTextField.getText();
 
         return url;
     }

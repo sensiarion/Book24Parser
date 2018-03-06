@@ -1,15 +1,14 @@
+package com;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -105,12 +104,12 @@ public class HttpApacheHandler {
         return response;
     }
 
-    public static void getImages(String src) throws IOException{
+    public static void getImages(String src,String photoPath) throws IOException{
 
         URL url = new URL(src);
         InputStream in = url.openStream();
 
-        OutputStream out = new BufferedOutputStream(new FileOutputStream("C:\\\\Users\\ДНС\\Desktop\\temp.png"));
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(photoPath));
 
         for (int i; (i = in.read()) != -1;)
             out.write(i);

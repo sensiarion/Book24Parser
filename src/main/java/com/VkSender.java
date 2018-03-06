@@ -1,6 +1,6 @@
+package com;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -27,20 +27,29 @@ public class VkSender {
     static final String USER_ID = "89548778";
     static final String ALBUM_ID = "252164558";
 
-    public static void post(String text, String photoUri ,long unixTime) throws IOException {
+    public static void post(String text, String photoUri,String photoPath ,int unixTime) throws IOException {
 
-
-        //составление запроса
-        System.out.println(text);
+        System.out.println("unixTime in VkSender.post = " + unixTime);
+        String attachments = "";
+        if(photoUri!=""){
+            try{
+             HttpApacheHandler.getImages(photoUri,photoPath);
+             attachments =  UploadPhotoToAlbum(photoPath,ALBUM_ID,GROUP_ID);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+                System.out.println("Не удалось загрузить фото");
+            }
+        }
 
         List<BasicNameValuePair> nvps = new ArrayList<>();
         nvps.add(new BasicNameValuePair("access_token",ACCESS_USER_TOKEN));
         nvps.add(new BasicNameValuePair("owner_id", OWNER_ID));
         nvps.add(new BasicNameValuePair("from_group","1"));
         nvps.add(new BasicNameValuePair("message", text));
-        //nvps.add(new BasicNameValuePair("attachments",""));
-        //nvps.add(new BasicNameValuePair("publish_date","0")); TODO
-        nvps.add(new BasicNameValuePair("v","5.73"));
+        nvps.add(new BasicNameValuePair("attachments",attachments));
+        nvps.add(new BasicNameValuePair("publish_date",String.valueOf(unixTime)));
+        nvps.add(new BasicNameValuePair("v","5.63"));
 
         CloseableHttpResponse response = HttpApacheHandler.getResponseFromPostType("https://api.vk.com/method/wall.post",nvps);
         System.out.println(HttpApacheHandler.getResponseEntity(response,false));
@@ -48,8 +57,10 @@ public class VkSender {
 
     }
 
+
+    //TODO: Queue for photos (for(i<5))
     public static String UploadPhotoToAlbum(String photoPath,String albumId,String groupId) throws IOException {
-        String respose ="";
+        String photoInfo ="photo";
         JSONObject jsonPhotoInfo =  UploadToServer(getUploadServer(albumId,groupId),photoPath);
         System.out.println(jsonPhotoInfo.get("server"));
         System.out.println(jsonPhotoInfo.get("photos_list"));
@@ -66,9 +77,13 @@ public class VkSender {
         nvps.add(new BasicNameValuePair("v","5.73"));
 
         CloseableHttpResponse response = HttpApacheHandler.getResponseFromPostType("https://api.vk.com/method/photos.save",nvps);
-        System.out.println(HttpApacheHandler.getResponseEntity(response,false));
+        JSONObject photoArray = HttpApacheHandler.getResponseEntity(response);
+        JSONObject photoEntity = photoArray.getJSONArray("response").getJSONObject(0);
+        int owner_id = photoEntity.getInt("owner_id");
+        int id = photoEntity.getInt("id");
+        photoInfo+=owner_id+"_"+id;
 
-        return respose;
+        return photoInfo;
     }
 
     public static String getUploadServer(String albumId,String groupId) throws IOException {
@@ -83,9 +98,7 @@ public class VkSender {
         HttpResponse response = HttpApacheHandler.getResponseFromGetType("https://api.vk.com/method/photos.getUploadServer",nvps);
         org.json.JSONObject responseEntity = HttpApacheHandler.getResponseEntity(response);
         upload_url = responseEntity.getJSONObject("response").getString("upload_url");
-        System.out.println(upload_url);
-
-
+        System.out.println("upload_url = " + upload_url);
         return upload_url;
     }
 
@@ -117,5 +130,3 @@ public class VkSender {
 
     }
 }
-
-
