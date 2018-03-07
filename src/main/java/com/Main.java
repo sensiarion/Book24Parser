@@ -1,9 +1,11 @@
 package com;
 
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -14,10 +16,12 @@ public class Main {
 
     //for choosing the right row in dates
     private static int selectedDateIndex =0;
-    private static long dayInMills = 86400000;
-    private static Vector<String> postDates;
+    private static int dayInc = 0;
+    private static File dir = new File(System.getProperty("user.dir"));
+    private static Vector<Date> postDates;
 
     public static void main(String args[]) throws IOException {
+
 
 
         GUI gui = new GUI();
@@ -31,9 +35,8 @@ public class Main {
 
         //VkSender.post(post,"",0,"C:\\\\Users\\ДНС\\Desktop\\temp.png");
 
-        //Calendar is too complicated for using (and by himself it's a big mistake)
 
-        postDates = getTimesVector(new Date());
+        postDates = getTimes(0);
         gui.dateList.setListData(postDates);
 
 
@@ -41,8 +44,9 @@ public class Main {
         gui.dateList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                gui.dateTextField.setText(postDates.get(gui.dateList.getSelectedIndex()));
                 selectedDateIndex = gui.dateList.getSelectedIndex();
+                gui.dateTextField.setText(postDates.get(selectedDateIndex).toString());
+
             }
         });
 
@@ -50,7 +54,7 @@ public class Main {
         gui.dateChangeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                postDates.set(selectedDateIndex,gui.dateTextField.getText());
+                postDates.set(selectedDateIndex,calendarFromString(gui.dateTextField.getText()));
                 gui.dateList.updateUI();
             }
         });
@@ -59,28 +63,23 @@ public class Main {
         gui.dayButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                postDates = getTimesVector(new Date(new Date().getTime()+dayInMills));
+                dayInc++;
+                postDates = getTimes(dayInc);
                 gui.dateList.setListData(postDates);
-                dayInMills+=86400000;
                 gui.dateList.updateUI();
             }
         });
 
+        //global post button
         gui.postButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                //date doesn't contain year
-                int postTime = formatedDatetoUnix(postDates.get(0));
-                Date corruptedUnix = new Date(postTime);
-                Date normalUnix = new Date();
-                normalUnix.setHours(corruptedUnix.getHours());
-                normalUnix.setMinutes(corruptedUnix.getMinutes());
-                normalUnix.setSeconds(corruptedUnix.getSeconds());
+                long postTime =(long) postDates.get(0).getTime()/1000;
 
                 String url = gui.getUrl();
 
-                System.out.println("postTime = " + normalUnix.getTime());
+                System.out.println("postTime = " + postTime);
                 System.out.println("url = " + url);
 
                 Map<String,String> respose = Book24Parser.getEntity(url);
@@ -90,53 +89,69 @@ public class Main {
                 System.out.println("post = " + post);
                 System.out.println("imageUrl = " + imageUrl);
 
-                //TODO: фикс времени (чекнуть правильная ли дата получается) и определиться с передачей времени контакту
                 try {
-                    VkSender.post(post,imageUrl,photoPath,(int)(normalUnix.getTime()/1000));
+                    VkSender.post(post,imageUrl,dir,postTime);
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
                 postDates.remove(0);
                 gui.dateList.updateUI();
 
+
             }
         });
 
+        gui.filePathButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
+                JFileChooser fileChooser = new JFileChooser(dir);
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setAcceptAllFileFilterUsed(false);
+
+                int ret = fileChooser.showDialog(null, "Выбрать папку для фото");
+                if (ret == JFileChooser.APPROVE_OPTION) {
+                    dir = fileChooser.getSelectedFile();
+                }
+
+            }
+        });
     }
 
-    private static Vector<String> getTimesVector(Date date) {
-        Vector<String> vector = new Vector<>();
-
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM HH:mm");
-        date.setHours(20);
-        date.setMinutes(0);
-        date.setSeconds(0);
-
-        for (int i = 1; i < 5; i++) {
-            vector.add(dateFormat.format(date));
-            date.setHours(20 + i);
+    private static Vector<Date> getTimes(int shift){
+        Vector<Date> vector = new Vector<>();
+        Calendar date = setToStartTime(shift);
+        for(int i=0;i<4;i++){
+            vector.add(date.getTime());
+            setNextTime(date);
         }
-
         return vector;
     }
 
-    private static String formatDate (Date date){
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM HH:mm");
-        return dateFormat.format(date);
+
+    private static Calendar setToStartTime(int shift){
+        Calendar today = Calendar.getInstance();
+        today.add(Calendar.DAY_OF_WEEK,shift);
+        today.clear(Calendar.MINUTE);
+        today.clear(Calendar.SECOND);
+        today.set(Calendar.HOUR,20);
+
+        return  today;
     }
 
-    private static int formatedDatetoUnix(String date){
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM HH:mm");
+    private static void setNextTime(Calendar date){
+        date.add(Calendar.HOUR,1);
+    }
 
+    private static Date calendarFromString(String stringDate){
+        Date date = new Date();
+        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
         try {
-            return (int) (dateFormat.parse(date).getTime()/1000);
+            date = format.parse(stringDate);
         } catch (ParseException e) {
             e.printStackTrace();
-            System.out.println("Не удалось преобразовать указанное вами время, установите его в соответствии с стартовым вариантом оформления");
-
         }
-        return 0;
+        return date;
     }
 }
 

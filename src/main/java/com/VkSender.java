@@ -27,7 +27,9 @@ public class VkSender {
     static final String USER_ID = "89548778";
     static final String ALBUM_ID = "252164558";
 
-    public static void post(String text, String photoUri,String photoPath ,int unixTime) throws IOException {
+    public static void post(String text, String photoUri,File dir ,long unixTime) throws IOException {
+
+        String photoPath = dir.getAbsolutePath()+"tempPhoto.png";
 
         System.out.println("unixTime in VkSender.post = " + unixTime);
         String attachments = "";

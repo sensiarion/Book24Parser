@@ -13,6 +13,7 @@ public class GUI extends JFrame {
     private JLabel timeLabel;
     public JTextField dateTextField;
     public JButton dateChangeButton;
+    public JButton filePathButton;
     public static volatile boolean ParseError = false;
 
 
@@ -20,7 +21,7 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
-        setSize(new Dimension(400,300));
+        setSize(new Dimension(500,400));
         add(panel);
         setVisible(true);
 
