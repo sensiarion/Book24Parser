@@ -1,5 +1,6 @@
 package com;
 
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -16,25 +17,14 @@ public class Main {
 
     //for choosing the right row in dates
     private static int selectedDateIndex =0;
+    private static boolean dayIsChanged = false;
     private static int dayInc = 0;
     private static File dir = new File(System.getProperty("user.dir"));
     private static Vector<Date> postDates;
 
-    public static void main(String args[]) throws IOException {
-
-
+    public static void main(String args[]) {
 
         GUI gui = new GUI();
-
-        String photoPath = "C:\\\\Users\\ДНС\\Desktop\\temp.png";
-
-//        Map<String,String> post = Book24Parser.getEntity("https://book24.ru/product/istoriya-rossiyskogo-gosudarstva-tsar-petr-alekseevich-aziatskaya-evropeizatsiya-1747176/?block=readers_choice");
-        //HttpApacheHandler.getImages("https://book24.ru/upload/resize_cache/iblock/548/600_800_1/548851a5b3dd365bd70a40a82ed1dcb3.png?utm_source=advcake&advcake_params=7wAZ1MM0s5ZAdsH&advcake=1&utm_medium=cpa&utm_campaign=cityads&utm_content=5zcW&utm_term=5zcW",photoPath);
-        //VkSender.UploadToServer(VkSender.getUploadServer(VkSender.ALBUM_ID,VkSender.GROUP_ID),"C:\\\\Users\\ДНС\\Desktop\\temp.png");
-        //VkSender.UploadPhotoToAlbum(photoPath,VkSender.ALBUM_ID,VkSender.GROUP_ID);
-
-        //VkSender.post(post,"",0,"C:\\\\Users\\ДНС\\Desktop\\temp.png");
-
 
         postDates = getTimes(0);
         gui.dateList.setListData(postDates);
@@ -44,8 +34,14 @@ public class Main {
         gui.dateList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                selectedDateIndex = gui.dateList.getSelectedIndex();
-                gui.dateTextField.setText(postDates.get(selectedDateIndex).toString());
+                if(dayIsChanged){
+                    dayIsChanged = false;
+                }
+                else {
+                    selectedDateIndex = gui.dateList.getSelectedIndex();
+                    gui.dateTextField.setText(postDates.get(selectedDateIndex).toString());
+                    System.out.println("selectedIndex = " + selectedDateIndex);
+                }
 
             }
         });
@@ -64,6 +60,7 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dayInc++;
+                dayIsChanged = true;
                 postDates = getTimes(dayInc);
                 gui.dateList.setListData(postDates);
                 gui.dateList.updateUI();

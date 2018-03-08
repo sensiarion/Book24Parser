@@ -22,7 +22,7 @@ public class GUI extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setSize(new Dimension(500,400));
-        add(panel);
+        this.add(panel);
         setVisible(true);
 
 
