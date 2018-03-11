@@ -2,6 +2,7 @@ package com;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Stack;
 
 public class GUI extends JFrame {
     private JTextField urlTextField;
@@ -14,7 +15,7 @@ public class GUI extends JFrame {
     public JTextField dateTextField;
     public JButton dateChangeButton;
     public JButton filePathButton;
-    public static volatile boolean ParseError = false;
+    public static Stack<Exception> ErrorStack = new Stack<>();
 
 
     GUI(){
@@ -24,20 +25,10 @@ public class GUI extends JFrame {
         setSize(new Dimension(500,400));
         this.add(panel);
         setVisible(true);
-
-
-
-    }
-
-    private static void parseErrorHandler(){
-        //TODO: eror windows generate
-        ParseError = false;
     }
 
     public String getUrl(){
-        String url = urlTextField.getText();
-
-        return url;
+        return urlTextField.getText();
     }
 
 }

@@ -14,11 +14,9 @@ import java.util.Map;
 
 public class Book24Parser {
 
-
-
     public static Map<String,String> getEntity(final String url){
 
-        Map<String,String> post = new HashMap<String, String>();
+        Map<String,String> post = new HashMap<>();
 
         //create Json doc and copying data from url
         Document doc = null;
@@ -26,7 +24,7 @@ public class Book24Parser {
             doc = Jsoup.connect(url).get();
         } catch (IOException e) {
             e.printStackTrace();
-            GUI.ParseError = true;
+            GUI.ErrorStack.push(e);
         }
 
         //getting post data
@@ -48,10 +46,8 @@ public class Book24Parser {
         finally {
             post.put("imageUrl",imageUri);
         }
-
         System.out.println(imageUri);
 
         return post;
     }
-
 }

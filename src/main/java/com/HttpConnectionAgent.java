@@ -15,14 +15,12 @@ public abstract class HttpConnectionAgent {
     public static HttpResponse connectResponse(URIBuilder uriBuilder) {
 
         URI uri = null;
-
         try {
             uri = uriBuilder.build();
         } catch (URISyntaxException e) {
             e.printStackTrace();
-            System.exit(-1);
+            GUI.ErrorStack.push(e);
         }
-
         HttpClient   client     = HttpClientBuilder.create().build();
         HttpGet      request    = new HttpGet(uri);
         HttpResponse response   = null;
@@ -31,9 +29,8 @@ public abstract class HttpConnectionAgent {
             response = client.execute(request);
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(-1);
+            GUI.ErrorStack.push(e);
         }
-
         return response;
     }
 }

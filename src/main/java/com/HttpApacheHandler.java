@@ -34,8 +34,6 @@ public class HttpApacheHandler {
         }
 
         reader.close();
-        responseLine = null;
-
         return  returnString;
     }
 
@@ -56,8 +54,6 @@ public class HttpApacheHandler {
         }
 
         reader.close();
-        responseLine = null;
-
         return  returnString;
     }
 
@@ -87,12 +83,13 @@ public class HttpApacheHandler {
         return response;
     }
 
-    public static HttpResponse getResponseFromGetType (String uri, List<BasicNameValuePair> arguments) throws IOException {
+    public static HttpResponse getResponseFromGetType (String uri, List<BasicNameValuePair> arguments){
 
         URIBuilder builder = null;
         try {
             builder = new URIBuilder(uri);
         } catch (URISyntaxException e) {
+            GUI.ErrorStack.push(e);
             e.printStackTrace();
         }
         for(BasicNameValuePair unit : arguments) {
@@ -104,12 +101,18 @@ public class HttpApacheHandler {
         return response;
     }
 
-    public static void getImages(String src,String photoPath) throws IOException{
+    public static void getImages(String src,String photoPath) throws IOException {
 
         URL url = new URL(src);
         InputStream in = url.openStream();
 
-        OutputStream out = new BufferedOutputStream(new FileOutputStream(photoPath));
+        OutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(photoPath));
+        } catch (FileNotFoundException e) {
+            GUI.ErrorStack.push(e);
+            e.printStackTrace();
+        }
 
         for (int i; (i = in.read()) != -1;)
             out.write(i);

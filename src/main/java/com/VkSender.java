@@ -16,20 +16,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VkSender {
+public class VkSender implements VkSettings {
 
-    //please don't use my token for your necessaries, I am too lazy for crypt it or hide in ENUM
-    static final String ACCESS_USER_TOKEN = "ae82396cb24f68048c5a94955006747f3ff25916e7b8e2a8074f5a687110cb2f600d5753e6efdfc761d12";
-    static final String ACCESS_TOKEN = "a821762541a7e01f041f131e135547cb538dd13ebab510ed3dd0a827b9f5317f25e90f9bad9d0e47cc9c3";
-    static final String GROUP_DOMAIN = "bookworld_hm";
-    static final String OWNER_ID = "-117584600" ;
-    static final String GROUP_ID = "117584600";
-    static final String USER_ID = "89548778";
-    static final String ALBUM_ID = "252164558";
+    /*  almost all method require default data for working with Vk API
+        it's contains in interface
+            ACCESS_USER_TOKEN
+            ACCESS_TOKEN
+            GROUP_DOMAIN - group name from url
+            OWNER_ID - differ from GROUP_ID by '-' before
+            GROUP_ID
+            USER_ID
+            ALBUM_ID
 
-    public static void post(String text, String photoUri,File dir ,long unixTime) throws IOException {
+    */
 
-        String photoPath = dir.getAbsolutePath()+"tempPhoto.png";
+    //load post to Vk with your text at "unixTime",picture from internet that will be saved in "dir" path
+    public static void post(String text, String photoUri,File dir ,long unixTime){
+
+        String photoPath = dir.getAbsolutePath()+"/tempPhoto.png";
 
         System.out.println("unixTime in VkSender.post = " + unixTime);
         String attachments = "";
@@ -40,6 +44,7 @@ public class VkSender {
             }
             catch (IOException e){
                 e.printStackTrace();
+                GUI.ErrorStack.push(e);
                 System.out.println("Не удалось загрузить фото");
             }
         }
@@ -53,15 +58,19 @@ public class VkSender {
         nvps.add(new BasicNameValuePair("publish_date",String.valueOf(unixTime)));
         nvps.add(new BasicNameValuePair("v","5.63"));
 
-        CloseableHttpResponse response = HttpApacheHandler.getResponseFromPostType("https://api.vk.com/method/wall.post",nvps);
-        System.out.println(HttpApacheHandler.getResponseEntity(response,false));
-
-
+        CloseableHttpResponse response = null;
+        try {
+            response = HttpApacheHandler.getResponseFromPostType("https://api.vk.com/method/wall.post",nvps);
+            System.out.println(HttpApacheHandler.getResponseEntity(response,false));
+        } catch (IOException e) {
+            e.printStackTrace();
+            GUI.ErrorStack.push(e);
+        }
     }
 
-
     //TODO: Queue for photos (for(i<5))
-    public static String UploadPhotoToAlbum(String photoPath,String albumId,String groupId) throws IOException {
+    //load photo to the album in selected group
+    private static String UploadPhotoToAlbum(String photoPath,String albumId,String groupId) throws IOException {
         String photoInfo ="photo";
         JSONObject jsonPhotoInfo =  UploadToServer(getUploadServer(albumId,groupId),photoPath);
         System.out.println(jsonPhotoInfo.get("server"));
@@ -88,7 +97,8 @@ public class VkSender {
         return photoInfo;
     }
 
-    public static String getUploadServer(String albumId,String groupId) throws IOException {
+    //get upload server for download photo to Vk
+    private static String getUploadServer(String albumId,String groupId) throws IOException {
         String upload_url;
 
         List<BasicNameValuePair> nvps = new ArrayList<>();
@@ -103,8 +113,8 @@ public class VkSender {
         System.out.println("upload_url = " + upload_url);
         return upload_url;
     }
-
-    public static JSONObject UploadToServer(String uploadUrl, String photoPath){
+    //load selected photo to server
+    private static JSONObject UploadToServer(String uploadUrl, String photoPath){
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost post = new HttpPost(uploadUrl);
@@ -119,6 +129,7 @@ public class VkSender {
         try {
             response =  httpClient.execute(post);
         } catch (IOException e) {
+            GUI.ErrorStack.push(e);
             e.printStackTrace();
         }
         JSONObject responseObj = null;
@@ -127,8 +138,6 @@ public class VkSender {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return responseObj;
-
     }
 }

@@ -7,7 +7,6 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,107 +30,96 @@ public class Main {
 
 
         //listen to selected row
-        gui.dateList.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if(dayIsChanged){
-                    dayIsChanged = false;
-                }
-                else {
-                    selectedDateIndex = gui.dateList.getSelectedIndex();
-                    gui.dateTextField.setText(postDates.get(selectedDateIndex).toString());
-                    System.out.println("selectedIndex = " + selectedDateIndex);
-                }
-
+        gui.dateList.addListSelectionListener(e -> {
+            if(dayIsChanged){
+                dayIsChanged = false;
             }
+            else {
+                selectedDateIndex = gui.dateList.getSelectedIndex();
+                gui.dateTextField.setText(postDates.get(selectedDateIndex).toString());
+                System.out.println("selectedIndex = " + selectedDateIndex);
+            }
+
         });
 
         //listen to change the row in textField
-        gui.dateChangeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                postDates.set(selectedDateIndex,calendarFromString(gui.dateTextField.getText()));
-                gui.dateList.updateUI();
-            }
+        gui.dateChangeButton.addActionListener(e -> {
+            postDates.set(selectedDateIndex,calendarFromString(gui.dateTextField.getText()));
+            gui.dateList.updateUI();
         });
 
         //listen to change the day in textField
-        gui.dayButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dayInc++;
-                dayIsChanged = true;
-                postDates = getTimes(dayInc);
-                gui.dateList.setListData(postDates);
-                gui.dateList.updateUI();
-            }
+        gui.dayButton.addActionListener(e -> {
+            dayInc++;
+            dayIsChanged = true;
+            postDates = getTimes(dayInc);
+            gui.dateList.setListData(postDates);
+            gui.dateList.updateUI();
         });
 
         //global post button
-        gui.postButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        gui.postButton.addActionListener(e -> {
 
-                long postTime =(long) postDates.get(0).getTime()/1000;
+            long postTime =(long) postDates.get(0).getTime()/1000;
 
-                String url = gui.getUrl();
+            String url = gui.getUrl();
 
-                System.out.println("postTime = " + postTime);
-                System.out.println("url = " + url);
+            System.out.println("postTime = " + postTime);
+            System.out.println("url = " + url);
 
-                Map<String,String> respose = Book24Parser.getEntity(url);
-                String post = respose.get("post");
-                String imageUrl = respose.get("imageUrl");
+            Map<String,String> respose = Book24Parser.getEntity(url);
+            String post = respose.get("post");
+            String imageUrl = respose.get("imageUrl");
 
-                System.out.println("post = " + post);
-                System.out.println("imageUrl = " + imageUrl);
+            System.out.println("post = " + post);
+            System.out.println("imageUrl = " + imageUrl);
 
-                try {
-                    VkSender.post(post,imageUrl,dir,postTime);
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                postDates.remove(0);
-                gui.dateList.updateUI();
+            VkSender.post(post,imageUrl,dir,postTime);
+            postDates.remove(0);
+            gui.dateList.updateUI();
 
-
-            }
+            for(Exception error: GUI.ErrorStack)
+                error.printStackTrace();
         });
 
-        gui.filePathButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        gui.filePathButton.addActionListener(e -> {
 
-                JFileChooser fileChooser = new JFileChooser(dir);
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                fileChooser.setAcceptAllFileFilterUsed(false);
+            JFileChooser fileChooser = new JFileChooser(dir);
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setAcceptAllFileFilterUsed(false);
 
-                int ret = fileChooser.showDialog(null, "Выбрать папку для фото");
-                if (ret == JFileChooser.APPROVE_OPTION) {
-                    dir = fileChooser.getSelectedFile();
-                }
-
+            int ret = fileChooser.showDialog(null, "Выбрать папку для фото");
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                dir = fileChooser.getSelectedFile();
             }
+
         });
+
     }
 
     private static Vector<Date> getTimes(int shift){
         Vector<Date> vector = new Vector<>();
         Calendar date = setToStartTime(shift);
+        System.out.println("date = " + date.getTime());
         for(int i=0;i<4;i++){
+            vector.add(date.getTime());
+            setNextTime(date);
+        }
+        setNextTime(date,8);
+        for(int i=4;i<8;i++){
             vector.add(date.getTime());
             setNextTime(date);
         }
         return vector;
     }
 
-
     private static Calendar setToStartTime(int shift){
         Calendar today = Calendar.getInstance();
-        today.add(Calendar.DAY_OF_WEEK,shift);
+        today.add(Calendar.DAY_OF_WEEK,shift-1);
         today.clear(Calendar.MINUTE);
         today.clear(Calendar.SECOND);
         today.set(Calendar.HOUR,20);
+        System.out.println("today in start = " + today.getTime());
 
         return  today;
     }
@@ -140,12 +128,17 @@ public class Main {
         date.add(Calendar.HOUR,1);
     }
 
+    private static void setNextTime(Calendar date,int hour){
+        date.set(Calendar.HOUR,hour);
+    }
+
     private static Date calendarFromString(String stringDate){
         Date date = new Date();
         DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
         try {
             date = format.parse(stringDate);
         } catch (ParseException e) {
+            GUI.ErrorStack.push(e);
             e.printStackTrace();
         }
         return date;
