@@ -37,7 +37,7 @@ public class VkSender implements VkSettings {
 
         System.out.println("unixTime in VkSender.post = " + unixTime);
         String attachments = "";
-        if(photoUri!=""){
+        if(!photoUri.equals("")){
             try{
              HttpApacheHandler.getImages(photoUri,photoPath);
              attachments =  UploadPhotoToAlbum(photoPath,ALBUM_ID,GROUP_ID);

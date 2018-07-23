@@ -40,6 +40,7 @@ public class Book24Parser {
         Elements description = doc.select("#bookDescription").select("div.text");
         Element image = doc.getElementsByClass("bookImage").first().getElementsByClass("magnifyImage").first();
 
+
         String postText = author.text() + " - \"" +title.text()+ "\"" + "\n" + "\n" + description.text() + "\n";
         post.put("post",postText);
 

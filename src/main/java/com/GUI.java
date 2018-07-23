@@ -22,13 +22,17 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
-        setSize(new Dimension(500,500));
+        setSize(new Dimension(600,700));
         this.add(panel);
         setVisible(true);
     }
 
     public String getUrl(){
         return urlTextField.getText();
+    }
+
+    public void cleanUrl(){
+        this.urlTextField.setText("");
     }
 
 }

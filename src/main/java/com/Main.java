@@ -78,6 +78,7 @@ public class Main {
             VkSender.post(post,imageUrl,dir,postTime);
             postDates.remove(0);
 
+            gui.cleanUrl();
             JOptionPane.showMessageDialog(gui,"Готово!");
 
             gui.dateList.updateUI();
@@ -105,15 +106,11 @@ public class Main {
         Vector<Date> vector = new Vector<>();
         Calendar date = setToStartTime(shift);
         System.out.println("date = " + date.getTime());
-        for(int i=0;i<4;i++){
+        for(int i=0;i<17;i++){
             vector.add(date.getTime());
             setNextTime(date);
         }
-        date = setToStartTime(shift,20);
-        for(int i=4;i<8;i++){
-            vector.add(date.getTime());
-            setNextTime(date);
-        }
+
         return vector;
     }
 
@@ -122,7 +119,7 @@ public class Main {
         today.add(Calendar.DAY_OF_WEEK,shift);
         today.clear(Calendar.MINUTE);
         today.clear(Calendar.SECOND);
-        today.set(Calendar.HOUR,8);
+        today.set(Calendar.HOUR_OF_DAY,8);
         System.out.println("today in start = " + today.getTime());
 
         return  today;
